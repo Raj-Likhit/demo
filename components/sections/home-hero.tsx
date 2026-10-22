@@ -33,6 +33,7 @@ export default function HomeHero() {
         .fromTo("[data-hero-kicker]", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45 })
         .fromTo("[data-hero-title]", { y: 28, opacity: 0 }, { y: 0, opacity: 1, duration: 0.75 }, "-=0.12")
         .fromTo("[data-hero-copy]", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45 }, "-=0.3")
+        .fromTo("[data-hero-mobile-activities]", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4 }, "-=0.22")
         .fromTo("[data-hero-actions]", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4 }, "-=0.18")
         .fromTo("[data-hero-aside]", { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45 }, "-=0.28")
         .fromTo("[data-hero-crowd]", { y: 24, scale: 1.025, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 1.3, ease: "power2.out" }, "-=0.75");
@@ -84,7 +85,7 @@ export default function HomeHero() {
         </div>
 
         {/* Editorial hero layout */}
-        <div className="relative z-10 mx-auto grid min-h-[100svh] w-full max-w-[1360px] grid-cols-1 items-start gap-10 px-6 pb-[250px] pt-32 sm:px-10 sm:pb-[290px] sm:pt-36 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-12 lg:px-12 lg:pb-[300px] lg:pt-[155px] xl:px-20">
+        <div className="relative z-10 mx-auto grid min-h-[100svh] w-full max-w-[1360px] grid-cols-1 items-start gap-10 px-6 pb-[300px] pt-32 sm:px-10 sm:pb-[320px] sm:pt-36 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-12 lg:px-12 lg:pb-[300px] lg:pt-[155px] xl:px-20">
           {/* Main headline and calls to action */}
           <div className="relative min-w-0">
             <div data-hero-kicker className="mb-7 inline-flex items-center gap-3">
@@ -116,6 +117,22 @@ export default function HomeHero() {
               Learn, collaborate, build real projects, and create
               opportunities together.
             </p>
+
+            <div
+              aria-label="DevCatalyst activities"
+              data-hero-mobile-activities
+              className="mt-6 grid grid-cols-2 gap-x-4 gap-y-2 border-y border-black/20 py-3.5 lg:hidden"
+            >
+              {activities.map(({ label, Icon }) => (
+                <div key={label} className="relative flex min-h-9 items-center gap-2 border-l border-black/65 pl-3.5">
+                  <span aria-hidden="true" className="absolute -left-[3px] top-1/2 size-1.5 -translate-y-1/2 rounded-full bg-black" />
+                  <Icon aria-hidden="true" size={18} strokeWidth={1.7} className="shrink-0 text-black" />
+                  <span className="whitespace-nowrap text-[9px] font-medium tracking-[0.11em] text-neutral-800 sm:text-[10px]">
+                    {label}
+                  </span>
+                </div>
+              ))}
+            </div>
 
             <div data-hero-actions className="mt-7 flex flex-wrap items-center gap-3">
               <a
