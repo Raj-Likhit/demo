@@ -50,7 +50,7 @@ export default function HomeHero() {
         ref={heroRef}
         id="home"
         aria-labelledby="hero-title"
-        className="relative isolate min-h-screen min-h-[100svh] overflow-hidden bg-white text-black"
+        className="relative isolate overflow-hidden bg-white text-black lg:min-h-screen lg:min-h-[100svh]"
       >
         <div className="pointer-events-none absolute left-7 top-9 z-20 hidden h-32 border-l border-black/70 pl-4 md:block lg:left-10">
           <p className="max-w-[90px] text-[10px] font-medium uppercase leading-[1.55] tracking-[0.17em] text-neutral-800">
@@ -71,7 +71,7 @@ export default function HomeHero() {
         {/* The supplied illustration anchors the hero beneath the copy. */}
         <div
           aria-hidden="true"
-          className="hero-crowd-frame pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[34svh] min-h-[230px] max-h-[320px] origin-bottom overflow-hidden sm:h-[39svh] sm:max-h-[370px] lg:h-[48svh] lg:max-h-[520px]"
+          className="hero-crowd-frame pointer-events-none absolute inset-x-0 bottom-0 z-0 hidden h-[48svh] max-h-[520px] origin-bottom overflow-hidden lg:block"
           data-hero-crowd
         >
           <Image
@@ -80,12 +80,12 @@ export default function HomeHero() {
             fill
             priority
             sizes="100vw"
-            className="object-contain object-bottom lg:object-cover lg:object-[50%_100%]"
+            className="object-cover object-[50%_100%]"
           />
         </div>
 
         {/* Editorial hero layout */}
-        <div className="relative z-10 mx-auto grid min-h-[100svh] w-full max-w-[1360px] grid-cols-1 items-start gap-10 px-6 pb-[300px] pt-32 sm:px-10 sm:pb-[320px] sm:pt-36 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-12 lg:px-12 lg:pb-[300px] lg:pt-[155px] xl:px-20">
+        <div className="relative z-10 mx-auto grid w-full max-w-[1360px] grid-cols-1 items-start gap-10 px-6 pt-32 sm:px-10 sm:pt-36 lg:min-h-[100svh] lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-12 lg:px-12 lg:pb-[300px] lg:pt-[155px] xl:px-20">
           {/* Main headline and calls to action */}
           <div className="relative min-w-0">
             <div data-hero-kicker className="mb-7 inline-flex items-center gap-3">
@@ -154,6 +154,22 @@ export default function HomeHero() {
                 <Github size={18} strokeWidth={1.8} />
                 Explore Projects
               </a>
+            </div>
+
+            <div
+              aria-hidden="true"
+              className="relative mt-6 -mx-6 sm:-mx-10 lg:hidden"
+              data-hero-crowd
+            >
+              <Image
+                src="/devcatalyst-crowd.png"
+                alt=""
+                priority
+                sizes="100vw"
+                width={1672}
+                height={461}
+                className="block h-auto w-full"
+              />
             </div>
           </div>
 
