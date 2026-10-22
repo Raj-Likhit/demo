@@ -71,7 +71,7 @@ export default function HomeHero() {
         {/* The supplied illustration anchors the hero beneath the copy. */}
         <div
           aria-hidden="true"
-          className="hero-crowd-frame pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[42svh] min-h-[270px] max-h-[440px] origin-bottom overflow-hidden sm:h-[46svh] lg:h-[48svh] lg:max-h-[520px]"
+          className="hero-crowd-frame pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[34svh] min-h-[230px] max-h-[320px] origin-bottom overflow-hidden sm:h-[39svh] sm:max-h-[370px] lg:h-[48svh] lg:max-h-[520px]"
           data-hero-crowd
         >
           <Image
@@ -80,7 +80,7 @@ export default function HomeHero() {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-[85%_100%] lg:object-[50%_100%]"
+            className="object-contain object-bottom lg:object-cover lg:object-[50%_100%]"
           />
         </div>
 
