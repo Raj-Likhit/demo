@@ -3,75 +3,105 @@
 import { gsap } from "gsap";
 import { useEffect, useRef } from "react";
 
-interface CrowdCanvasProps { src: string; rows?: number; cols?: number; className?: string; }
+interface CrowdCanvasProps {
+  className?: string;
+}
 
-type Peep = {
-  image: HTMLImageElement; rect: number[]; width: number; height: number;
-  x: number; y: number; anchorY: number; scaleX: number; walk: gsap.core.Timeline | null;
-  setRect: (rect: number[]) => void; render: (ctx: CanvasRenderingContext2D) => void;
-};
+const PEOPLE = [
+  { x: -28, y: 252, s: 0.82, row: 0, hair: 0 }, { x: 78, y: 246, s: 0.82, row: 0, hair: 1 },
+  { x: 186, y: 254, s: 0.82, row: 0, hair: 2 }, { x: 294, y: 244, s: 0.82, row: 0, hair: 3 },
+  { x: 402, y: 251, s: 0.82, row: 0, hair: 1 }, { x: 510, y: 245, s: 0.82, row: 0, hair: 0 },
+  { x: 618, y: 253, s: 0.82, row: 0, hair: 2 }, { x: 726, y: 244, s: 0.82, row: 0, hair: 3 },
+  { x: 834, y: 252, s: 0.82, row: 0, hair: 1 }, { x: 942, y: 245, s: 0.82, row: 0, hair: 2 },
+  { x: 1050, y: 253, s: 0.82, row: 0, hair: 0 }, { x: 1158, y: 244, s: 0.82, row: 0, hair: 3 },
+  { x: 1266, y: 252, s: 0.82, row: 0, hair: 1 }, { x: 1374, y: 246, s: 0.82, row: 0, hair: 2 },
+  { x: 20, y: 327, s: 0.94, row: 1, hair: 2 }, { x: 150, y: 320, s: 0.94, row: 1, hair: 0 },
+  { x: 280, y: 329, s: 0.94, row: 1, hair: 3 }, { x: 410, y: 320, s: 0.94, row: 1, hair: 1 },
+  { x: 540, y: 329, s: 0.94, row: 1, hair: 2 }, { x: 670, y: 319, s: 0.94, row: 1, hair: 0 },
+  { x: 800, y: 328, s: 0.94, row: 1, hair: 3 }, { x: 930, y: 320, s: 0.94, row: 1, hair: 1 },
+  { x: 1060, y: 328, s: 0.94, row: 1, hair: 2 }, { x: 1190, y: 319, s: 0.94, row: 1, hair: 0 },
+  { x: 1320, y: 328, s: 0.94, row: 1, hair: 3 },
+  { x: -22, y: 390, s: 1.12, row: 2, hair: 1 }, { x: 150, y: 385, s: 1.12, row: 2, hair: 3 },
+  { x: 322, y: 393, s: 1.12, row: 2, hair: 0 }, { x: 494, y: 385, s: 1.12, row: 2, hair: 2 },
+  { x: 666, y: 393, s: 1.12, row: 2, hair: 1 }, { x: 838, y: 385, s: 1.12, row: 2, hair: 3 },
+  { x: 1010, y: 393, s: 1.12, row: 2, hair: 0 }, { x: 1182, y: 385, s: 1.12, row: 2, hair: 2 },
+  { x: 1354, y: 393, s: 1.12, row: 2, hair: 1 },
+];
 
-export function CrowdCanvas({ src, rows = 15, cols = 7, className }: CrowdCanvasProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+function Student({ hair, index }: { hair: number; index: number }) {
+  const hairstyles = [
+    "M25 41 Q24 8 50 9 Q77 9 76 41 L68 31 Q53 24 31 35 Z",
+    "M25 43 Q20 12 48 9 Q79 8 77 39 L70 34 Q61 20 48 27 Q36 35 29 48 Z",
+    "M26 37 Q27 10 50 8 Q72 9 75 35 Q65 26 57 25 Q44 31 26 37 Z",
+    "M24 41 Q22 11 50 9 Q78 11 76 42 L69 39 Q67 27 61 22 L57 35 L52 22 Q42 25 34 39 Z",
+  ];
+
+  return (
+    <g data-crowd-person data-crowd-row={index < 14 ? "0" : index < 25 ? "1" : "2"}>
+      <path d="M7 150 Q9 112 30 103 L40 98 L60 98 L71 103 Q94 113 96 150Z" fill={index % 2 ? "#111" : "#242424"} />
+      <path d="M38 93 L38 106 Q50 116 62 106 L62 93" fill="#fff" stroke="#111" strokeWidth="2" />
+      <ellipse cx="50" cy="51" rx="24" ry="29" fill="#fff" stroke="#111" strokeWidth="2.5" />
+      <path d={hairstyles[hair]} fill="#111" />
+      <circle cx="42" cy="52" r="2" fill="#111" />
+      <circle cx="58" cy="52" r="2" fill="#111" />
+      <path d="M43 64 Q50 70 57 64" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" />
+      {index % 5 === 1 && <g fill="none" stroke="#111" strokeWidth="1.8"><circle cx="42" cy="52" r="6" /><circle cx="58" cy="52" r="6" /><path d="M48 52h4" /></g>}
+      <path d="M16 122 Q31 113 40 113 M84 122 Q69 113 60 113" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
+      {index % 3 !== 1 && (
+        <g transform="translate(30 121)">
+          <path d="M0 0h40l-4 23H4Z" fill="#fff" stroke="#111" strokeWidth="2" />
+          <path d="M17 23v4m-8 1h22" stroke="#111" strokeWidth="2" strokeLinecap="round" />
+          <path d="m17 8 4-3 4 3-4 4z" fill="none" stroke="#111" strokeWidth="1.5" />
+        </g>
+      )}
+    </g>
+  );
+}
+
+export function CrowdCanvas({ className }: CrowdCanvasProps) {
+  const sceneRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-    const stage = { width: 0, height: 0 };
-    const allPeeps: Peep[] = [], availablePeeps: Peep[] = [], crowd: Peep[] = [];
-    const random = (min: number, max: number) => min + Math.random() * (max - min);
-    const take = <T,>(list: T[]) => list.splice((Math.random() * list.length) | 0, 1)[0];
+    const scene = sceneRef.current;
+    if (!scene || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const createPeep = (image: HTMLImageElement, rect: number[]): Peep => {
-      const peep = {} as Peep;
-      Object.assign(peep, {
-        image, rect: [], width: 0, height: 0, x: 0, y: 0, anchorY: 0, scaleX: 1, walk: null,
-        setRect(nextRect: number[]) { peep.rect = nextRect; peep.width = nextRect[2]; peep.height = nextRect[3]; },
-        render(context: CanvasRenderingContext2D) {
-          context.save(); context.translate(peep.x, peep.y); context.scale(peep.scaleX, 1);
-          context.drawImage(peep.image, peep.rect[0], peep.rect[1], peep.rect[2], peep.rect[3], 0, 0, peep.width, peep.height);
-          context.restore();
-        },
-      });
-      peep.setRect(rect); return peep;
-    };
-    const reset = (peep: Peep) => {
-      const right = Math.random() > 0.5;
-      const y = stage.height - peep.height + 100 - 250 * gsap.parseEase("power2.in")(Math.random());
-      peep.scaleX = right ? 1 : -1; peep.x = right ? -peep.width : stage.width + peep.width; peep.y = y; peep.anchorY = y;
-      return { x: right ? stage.width : 0, y };
-    };
-    const addPeep = () => {
-      const peep = take(availablePeeps); if (!peep) return;
-      const target = reset(peep);
-      peep.walk = gsap.timeline({ onComplete: () => { const i = crowd.indexOf(peep); if (i >= 0) crowd.splice(i, 1); availablePeeps.push(peep); addPeep(); } })
-        .timeScale(random(0.5, 1.45))
-        .to(peep, { duration: 10, x: target.x, ease: "none" }, 0)
-        .to(peep, { duration: 0.25, repeat: 40, yoyo: true, y: target.y - 10 }, 0);
-      crowd.push(peep); crowd.sort((a, b) => a.anchorY - b.anchorY);
-    };
-    const render = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.save(); ctx.scale(devicePixelRatio, devicePixelRatio); crowd.forEach((peep) => peep.render(ctx)); ctx.restore(); };
-    const resize = () => {
-      stage.width = canvas.clientWidth; stage.height = canvas.clientHeight;
-      canvas.width = stage.width * devicePixelRatio; canvas.height = stage.height * devicePixelRatio;
-      crowd.forEach((peep) => peep.walk?.kill()); crowd.length = 0; availablePeeps.length = 0; availablePeeps.push(...allPeeps);
-      while (availablePeeps.length) addPeep();
-    };
-    const image = document.createElement("img");
-    image.onload = () => {
-      const width = image.naturalWidth / rows, height = image.naturalHeight / cols;
-      for (let i = 0; i < rows * cols; i++) allPeeps.push(createPeep(image, [(i % rows) * width, ((i / rows) | 0) * height, width, height]));
-      resize(); gsap.ticker.add(render);
-    };
-    image.src = src;
-    window.addEventListener("resize", resize);
-    return () => { window.removeEventListener("resize", resize); gsap.ticker.remove(render); crowd.forEach((peep) => peep.walk?.kill()); };
-  }, [src, rows, cols]);
+    const context = gsap.context(() => {
+      gsap.timeline({ defaults: { ease: "power2.out" } })
+        .fromTo('[data-crowd-row="0"]', { y: 12, opacity: 0 }, { y: 0, opacity: 0.68, duration: 0.7, stagger: 0.035 })
+        .fromTo('[data-crowd-row="1"]', { y: 14, opacity: 0 }, { y: 0, opacity: 0.86, duration: 0.7, stagger: 0.04 }, "-=0.3")
+        .fromTo('[data-crowd-row="2"]', { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.75, stagger: 0.045 }, "-=0.3");
+    }, scene);
 
-  return <canvas aria-hidden="true" ref={canvasRef} className={className ?? "absolute bottom-0 h-[90vh] w-full"} />;
+    return () => context.revert();
+  }, []);
+
+  return (
+    <svg
+      ref={sceneRef}
+      aria-hidden="true"
+      className={className ?? "absolute inset-0 h-full w-full"}
+      viewBox="0 0 1440 520"
+      preserveAspectRatio="xMidYMax slice"
+      fill="none"
+    >
+      <defs>
+        <linearGradient id="crowd-fade" x1="720" y1="0" x2="720" y2="170" gradientUnits="userSpaceOnUse">
+          <stop stopColor="white" stopOpacity="0" />
+          <stop offset="1" stopColor="white" />
+        </linearGradient>
+        <mask id="crowd-mask"><rect width="1440" height="520" fill="url(#crowd-fade)" /></mask>
+      </defs>
+      <g mask="url(#crowd-mask)">
+        {PEOPLE.map((person, index) => (
+          <g key={index} transform={`translate(${person.x} ${person.y}) scale(${person.s})`}>
+            <Student hair={person.hair} index={index} />
+          </g>
+        ))}
+      </g>
+    </svg>
+  );
 }
 
 export default function Skiper39() {
-  return <div className="relative h-full w-full"><CrowdCanvas src="https://cdn.21st.dev/assets/localized/abdb8990a7bef8c2f5af3e45f0a3c969c4b0603fba8be92e81347de4ea4e1ed7.png" rows={15} cols={7} /></div>;
+  return <div className="relative h-full w-full"><CrowdCanvas /></div>;
 }

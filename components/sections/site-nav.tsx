@@ -1,221 +1,171 @@
+
 "use client";
 
-import { Menu, X } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
-
-// Section background mapping (read-only from codebase inspection)
-const SECTION_THEMES: Record<string, "light" | "dark"> = {
-  "": "light",            // hero/top - white background
-  "workflow": "dark",      // bg-[#15251a] - dark green/black
-  "about": "light",        // bg-[#f8f7f4] - off-white
-  "gallery": "light",      // bg-[#e9ece5] - light beige
-  "testimonials": "light", // bg-white - white
-  "faq": "light",          // bg-gradient light blue to white
-};
+import { ArrowUpRight, Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const NAV_LINKS = [
-  { label: "Workflow", href: "#workflow" },
-  { label: "About us", href: "#about" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Testimonials", href: "#testimonials" },
-  { label: "FAQ", href: "#faq" },
+  { label: "What we do", href: "#workflow" },
+  { label: "Projects", href: "#gallery" },
+  { label: "Events", href: "#testimonials" },
+  { label: "Team", href: "#about" },
 ];
 
 export default function SiteNav() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const reducedMotion = useRef(false);
-  const rafRef = useRef<number | undefined>(undefined);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    reducedMotion.current = mediaQuery.matches;
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      reducedMotion.current = e.matches;
-    };
-    
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
+    let frame = 0;
 
-  useEffect(() => {
-    // Get all sections
-    const sections = [
-      { element: document.querySelector("section") as HTMLElement, id: "" }, // Hero section (first)
-      ...Object.keys(SECTION_THEMES)
-        .filter(id => id !== "")
-        .map(id => ({ element: document.getElementById(id), id }))
-        .filter(({ element }) => element !== null) as { element: HTMLElement; id: string }[]
-    ];
-
-    const updateTheme = () => {
-      const scrollY = window.scrollY;
-      const navbarCenter = 56; // Approximate center of navbar
-
-      // Find which section is at the navbar center
-      for (const { element, id } of sections) {
-        const rect = element.getBoundingClientRect();
-        const absoluteTop = scrollY + rect.top;
-        const absoluteBottom = absoluteTop + element.offsetHeight;
-
-        // Check if navbar center is within this section
-        if (scrollY + navbarCenter >= absoluteTop && scrollY + navbarCenter < absoluteBottom) {
-          const newTheme = SECTION_THEMES[id] || "light";
-          setTheme(newTheme);
-          break;
-        }
-      }
-    };
-
-    // Throttled scroll handler using requestAnimationFrame
     const handleScroll = () => {
-      if (rafRef.current) return;
-      
-      rafRef.current = requestAnimationFrame(() => {
-        updateTheme();
-        rafRef.current = undefined;
+      if (frame) return;
+
+      frame = window.requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 24);
+        frame = 0;
       });
     };
 
-    // Initial check
-    updateTheme();
+    handleScroll();
 
-    // Use scroll event with RAF throttling
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", updateTheme, { passive: true });
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", updateTheme);
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
+
+      if (frame) {
+        window.cancelAnimationFrame(frame);
       }
     };
   }, []);
 
-  const isDark = theme === "dark";
-  const transitionClass = reducedMotion.current ? "" : "transition-all duration-[400ms] ease-in-out";
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [mobileOpen]);
+
+  const closeMobileMenu = () => setMobileOpen(false);
 
   return (
-    <>
-      <nav className="fixed left-0 right-0 top-0 z-[9998] flex justify-center pt-6">
-        <div className="flex items-start gap-3 px-6 lg:px-10">
-          {/* Logo circle */}
+    <nav
+      aria-label="Main navigation"
+      className="fixed inset-x-4 top-4 z-[9998] sm:inset-x-6 sm:top-5"
+    >
+      <div className="mx-auto w-full max-w-[1060px]">
+        <div
+          className={`relative flex min-h-[60px] items-center justify-between gap-3 rounded-full border px-3 py-2 shadow-[0_5px_24px_rgba(0,0,0,0.06)] backdrop-blur-2xl backdrop-saturate-150 transition-[background-color,box-shadow,border-color] duration-300 supports-[backdrop-filter]:bg-white/55 ${scrolled ? "border-black/[0.12] bg-white/85 shadow-[0_10px_35px_rgba(0,0,0,0.10)]" : "border-black/[0.09] bg-white/70"}`}
+        >
+          {/* Brand */}
           <a
-            href="#"
-            className={`flex size-14 shrink-0 items-center justify-center rounded-full border backdrop-blur-xl overflow-hidden ${transitionClass} ${
-              isDark
-                ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
-                : "border-black/10 bg-white/60 text-black hover:bg-white/80"
-            }`}
-            style={{ 
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-            }}
+            href="#home"
+            onClick={closeMobileMenu}
             aria-label="DevCatalyst home"
+            className="group flex min-w-0 shrink-0 items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
           >
-            <div className="relative size-[56px]">
-              {/* Light mode logo */}
+            <span className="relative grid size-9 shrink-0 place-items-center">
               <img
-                src="/logo-light.svg"
-                alt="DevCatalyst"
-                className={`absolute inset-0 size-full ${transitionClass} ${
-                  isDark ? "opacity-0" : "opacity-100"
-                }`}
+                src="/logo-mark.svg"
+                alt=""
+                aria-hidden="true"
+                className="size-9 object-contain"
               />
-              {/* Dark mode logo */}
-              <img
-                src="/logo-dark.svg"
-                alt="DevCatalyst"
-                className={`absolute inset-0 size-full ${transitionClass} ${
-                  isDark ? "opacity-100" : "opacity-0"
-                }`}
-              />
-            </div>
+            </span>
+
+            <span className="text-[16px] font-semibold tracking-[-0.045em] text-black sm:text-[18px]">
+              DevCatalyst
+            </span>
           </a>
 
-          {/* Desktop nav pill */}
-          <div
-            className={`hidden items-center gap-8 rounded-full border backdrop-blur-xl px-8 py-4 md:flex ${transitionClass} ${
-              isDark
-                ? "border-white/20 bg-white/10 text-white"
-                : "border-black/10 bg-white/60 text-black"
-            }`}
-            style={{ 
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-            }}
-          >
+          {/* Desktop navigation */}
+          <div className="hidden items-center gap-5 lg:flex xl:gap-7">
             {NAV_LINKS.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium ${transitionClass} ${
-                  isDark ? "hover:text-white/70" : "hover:text-black/60"
-                }`}
+                className="whitespace-nowrap rounded-full px-1 py-2 text-[13px] font-medium text-neutral-800 transition-colors duration-200 hover:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
               >
                 {link.label}
               </a>
             ))}
           </div>
 
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className={`flex size-14 shrink-0 items-center justify-center rounded-full border backdrop-blur-xl md:hidden ${transitionClass} ${
-              isDark
-                ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
-                : "border-black/10 bg-white/60 text-black hover:bg-white/80"
-            }`}
-            style={{ 
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-            }}
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            aria-expanded={mobileOpen}
+          {/* Desktop primary CTA */}
+          <a
+            href="#about"
+            className="group hidden shrink-0 items-center justify-center gap-2 rounded-full bg-black px-4 py-2.5 text-[12px] font-medium text-white transition-colors duration-200 hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 lg:inline-flex"
           >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+            Join the club
+            <ArrowUpRight
+              size={15}
+              strokeWidth={1.8}
+              className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            />
+          </a>
 
-          {/* Mobile menu panel */}
-          {mobileOpen && (
-            <div
-              className={`absolute left-6 right-6 top-20 flex flex-col gap-2 rounded-2xl border backdrop-blur-xl p-4 md:hidden ${transitionClass} ${
-                isDark
-                  ? "border-white/20 bg-white/10 text-white"
-                  : "border-black/10 bg-white/60 text-black"
-              }`}
-              style={{ 
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-              }}
-            >
+          {/* Mobile menu toggle */}
+          <button
+            type="button"
+            onClick={() => setMobileOpen((open) => !open)}
+            aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
+            className="grid size-10 shrink-0 place-items-center text-black transition-colors hover:bg-black/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 lg:hidden"
+          >
+            {mobileOpen ? (
+              <X size={19} strokeWidth={1.8} />
+            ) : (
+              <Menu size={19} strokeWidth={1.8} />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile dropdown */}
+        {mobileOpen && (
+          <div
+            id="mobile-navigation"
+            className={[
+              "absolute right-0 top-[calc(100%+0.75rem)] w-[min(20rem,calc(100vw-3rem))] rounded-[24px] border border-black/10 bg-white/80 p-3 shadow-[0_12px_30px_rgba(0,0,0,0.08)] backdrop-blur-2xl backdrop-saturate-150 supports-[backdrop-filter]:bg-white/70",
+              "animate-in fade-in slide-in-from-top-2 duration-200 lg:hidden",
+            ].join(" ")}
+          >
+            <div className="flex flex-col gap-1">
               {NAV_LINKS.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`rounded-lg px-4 py-3 text-sm font-medium ${transitionClass} ${
-                    isDark ? "hover:bg-white/10" : "hover:bg-black/5"
-                  }`}
+                  onClick={closeMobileMenu}
+                  className="rounded-xl px-4 py-3.5 text-sm font-medium text-neutral-800 transition-colors hover:bg-black/[0.045] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
                 >
                   {link.label}
                 </a>
               ))}
-            </div>
-          )}
-        </div>
-      </nav>
 
-      {/* Click outside to close mobile menu */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-[9997] md:hidden"
-          onClick={() => setMobileOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-    </>
+              <a
+                href="#about"
+                onClick={closeMobileMenu}
+                className="mt-2 flex min-h-12 items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+              >
+                Join the club
+                <ArrowUpRight size={16} strokeWidth={1.8} />
+              </a>
+            </div>
+          </div>
+        )}
+      </div>
+    </nav>
   );
 }
